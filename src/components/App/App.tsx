@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { useDebounce } from 'use-debounce';
 import NoteList from '../NoteList/NoteList';
@@ -15,24 +15,19 @@ const App: React.FC = () => {
   const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const queryClient = useQueryClient(); 
+  const queryClient = useQueryClient();
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['notes', currentPage, debouncedSearchTerm],
-    queryFn: () => fetchNotes({ 
-      page: currentPage, 
-      perPage: 12, 
-      search: debouncedSearchTerm 
-    }),
+    queryFn: () =>
+      fetchNotes({
+        page: currentPage,
+        perPage: 12,
+        search: debouncedSearchTerm,
+      }),
     staleTime: 5 * 60 * 1000,
     placeholderData: keepPreviousData,
   });
-
-  
-  useEffect(() => {
-    if (debouncedSearchTerm !== searchTerm && currentPage !== 1) {
-      setCurrentPage(1);
-    }
-  }, [debouncedSearchTerm, searchTerm, currentPage]);
 
   const handlePageChange = (selectedItem: { selected: number }) => {
     setCurrentPage(selectedItem.selected + 1);
@@ -40,6 +35,7 @@ const App: React.FC = () => {
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
+    setCurrentPage(1); 
   };
 
   const handleCreateNote = () => {
@@ -53,10 +49,6 @@ const App: React.FC = () => {
   const handleNoteCreated = () => {
     queryClient.invalidateQueries({ queryKey: ['notes'] });
     setIsModalOpen(false);
-  };
-
-  const handleNoteDeleted = () => {
-    queryClient.invalidateQueries({ queryKey: ['notes'] });
   };
 
   if (error) {
@@ -75,10 +67,7 @@ const App: React.FC = () => {
   return (
     <div className={css.app}>
       <header className={css.toolbar}>
-        <SearchBox 
-          value={searchTerm}
-          onChange={handleSearchChange}
-        />
+        <SearchBox value={searchTerm} onChange={handleSearchChange} />
         {totalPages > 1 && (
           <Pagination
             pageCount={totalPages}
@@ -93,25 +82,19 @@ const App: React.FC = () => {
 
       {isLoading && <div className={css.loading}>Loading notes...</div>}
 
-      {notes.length > 0 && (
-        <NoteList 
-          notes={notes}
-          onNoteDeleted={handleNoteDeleted}
-        />
-      )}
+      {notes.length > 0 && <NoteList notes={notes} />}
 
       {!isLoading && notes.length === 0 && (
         <div className={css.emptyState}>
-          {searchTerm ? 'No notes found for your search.' : 'No notes yet. Create your first note!'}
+          {searchTerm
+            ? 'No notes found for your search.'
+            : 'No notes yet. Create your first note!'}
         </div>
       )}
 
       {isModalOpen && (
         <Modal onClose={handleCloseModal}>
-          <NoteForm 
-            onCancel={handleCloseModal}
-            onSubmit={handleNoteCreated}
-          />
+          <NoteForm onCancel={handleCloseModal} onSubmit={handleNoteCreated} />
         </Modal>
       )}
     </div>
@@ -119,3 +102,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+

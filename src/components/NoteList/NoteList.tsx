@@ -6,17 +6,15 @@ import css from './NoteList.module.css';
 
 interface NoteListProps {
   notes: Note[];
-  onNoteDeleted: () => void;
 }
 
-const NoteList: React.FC<NoteListProps> = ({ notes, onNoteDeleted }) => {
+const NoteList: React.FC<NoteListProps> = ({ notes }) => {
   const queryClient = useQueryClient();
   
   const deleteMutation = useMutation<Note, Error, number>({
     mutationFn: deleteNote,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notes'] });
-      onNoteDeleted();
     },
     onError: (error) => {
       console.error('Failed to delete note:', error);
