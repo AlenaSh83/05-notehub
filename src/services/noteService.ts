@@ -18,13 +18,8 @@ interface FetchNotesParams {
 }
 
 interface NotesApiResponse {
-  data: Note[];
-  meta: {
-    totalPages: number;
-    currentPage: number;
-    perPage: number;
-    total: number;
-  };
+  notes: Note[];
+  totalPages: number;
 }
 
 
@@ -48,7 +43,7 @@ export const fetchNotes = async (
   return response.data;
 };
 
-// ✅ Створити нотатку
+
 export const createNote = async (note: CreateNoteParams): Promise<Note> => {
   const response = await axios.post<Note>(`${BASE_URL}`, note, {
     headers: getAuthHeader(), 
@@ -56,11 +51,12 @@ export const createNote = async (note: CreateNoteParams): Promise<Note> => {
   return response.data;
 };
 
-// ✅ Видалити нотатку
-export const deleteNote = async (id: string): Promise<void> => {
-  await axios.delete(`${BASE_URL}/${id}`, {
+
+export const deleteNote = async (id: number): Promise<Note> => {
+  const response = await axios.delete<Note>(`${BASE_URL}/${id}`, {
     headers: getAuthHeader(), 
   });
+  return response.data;
 };
 
 const noteService = {
@@ -70,5 +66,4 @@ const noteService = {
 };
 
 export default noteService;
-
 

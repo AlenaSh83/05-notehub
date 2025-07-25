@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { useDebounce } from 'use-debounce';
 import NoteList from '../NoteList/NoteList';
 import Pagination from '../Pagination/Pagination';
@@ -25,6 +24,7 @@ const App: React.FC = () => {
       search: debouncedSearchTerm 
     }),
     staleTime: 5 * 60 * 1000,
+    placeholderData: keepPreviousData,
   });
 
   
@@ -69,8 +69,8 @@ const App: React.FC = () => {
     );
   }
 
-  const notes = data?.data || [];
-  const totalPages = data?.meta?.totalPages || 0;
+  const notes = data?.notes || [];
+  const totalPages = data?.totalPages || 0;
 
   return (
     <div className={css.app}>
